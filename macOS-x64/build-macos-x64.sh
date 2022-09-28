@@ -5,7 +5,8 @@
 #Parameters
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 TARGET_DIRECTORY="$SCRIPTPATH/target"
-PRODUCT=${1}
+PRODUCT_FULL=${1}
+PRODUCT=$(sed "s/ //g" <<< $PRODUCT_FULL)
 VERSION=${2}
 DATE=`date +%Y-%m-%d`
 TIME=`date +%H:%M:%S`
@@ -32,17 +33,17 @@ function printUsage() {
 printSignature
 
 #Argument validation
-if [[ "$1" == "-h" ||  "$1" == "--help" ]]; then
+if [[ "$PRODUCT_FULL" == "-h" ||  "$PRODUCT_FULL" == "--help" ]]; then
     printUsage
     exit 1
 fi
-if [ -z "$1" ]; then
+if [ -z "$PRODUCT_FULL" ]; then
     echo "Please enter a valid application name for your application"
     echo
     printUsage
     exit 1
 else
-    echo "Application Name : $1"
+    echo "Application Name : $PRODUCT_FULL"
 fi
 if [[ "$2" =~ [0-9]+.[0-9]+.[0-9]+ ]]; then
     echo "Application Version : $2"
@@ -107,10 +108,12 @@ copyBuildDirectory() {
 
     sed -i '' -e 's/__VERSION__/'${VERSION}'/g' "${TARGET_DIRECTORY}/darwin/Distribution"
     sed -i '' -e 's/__PRODUCT__/'${PRODUCT}'/g' "${TARGET_DIRECTORY}/darwin/Distribution"
+    sed -i '' -e 's/__PRODUCT_FULL__/'"${PRODUCT_FULL}"'/g' "${TARGET_DIRECTORY}/darwin/Distribution"
     chmod -R 755 "${TARGET_DIRECTORY}/darwin/Distribution"
 
     sed -i '' -e 's/__VERSION__/'${VERSION}'/g' "${TARGET_DIRECTORY}"/darwin/Resources/*.html
     sed -i '' -e 's/__PRODUCT__/'${PRODUCT}'/g' "${TARGET_DIRECTORY}"/darwin/Resources/*.html
+    sed -i '' -e 's/__PRODUCT_FULL__/'"${PRODUCT_FULL}"'/g' "${TARGET_DIRECTORY}"/darwin/Resources/*.html
     chmod -R 755 "${TARGET_DIRECTORY}/darwin/Resources/"
 
     rm -rf "${TARGET_DIRECTORY}/darwinpkg"
